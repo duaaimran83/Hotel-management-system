@@ -10,9 +10,26 @@ const PaymentModal = ({ booking, onClose, onPayment }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!cardNumber || !cardName || !expiryDate || !cvv) {
       alert('Please fill in all payment details');
+      return;
+    }
+
+    // Validate expiry date format and values
+    const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+    if (!expiryRegex.test(expiryDate)) {
+      alert('Please enter a valid expiry date in MM/YY format');
+      return;
+    }
+
+    const [month, year] = expiryDate.split('/').map(num => parseInt(num));
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear() % 100; // Get last 2 digits
+    const currentMonth = currentDate.getMonth() + 1;
+
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      alert('Your card has expired. Please use a valid card.');
       return;
     }
 
@@ -130,7 +147,11 @@ const PaymentModal = ({ booking, onClose, onPayment }) => {
             <input
               type="text"
               value={cardName}
-              onChange={(e) => setCardName(e.target.value.toUpperCase())}
+              onChange={(e) => {
+                // Remove any numbers from the input
+                const value = e.target.value.replace(/[0-9]/g, '');
+                setCardName(value.toUpperCase());
+              }}
               placeholder="JOHN DOE"
               required
             />
@@ -145,7 +166,25 @@ const PaymentModal = ({ booking, onClose, onPayment }) => {
                 onChange={(e) => {
                   const value = e.target.value.replace(/\D/g, '');
                   if (value.length <= 4) {
-                    setExpiryDate(value.match(/.{1,2}/g)?.join('/') || value);
+                    const formatted = value.match(/.{1,2}/g)?.join('/') || value;
+
+                    // Validate month and year
+                    if (value.length >= 2) {
+                      const month = parseInt(value.substring(0, 2));
+                      if (month > 12 || month < 1) {
+                        return; // Don't update if month is invalid
+                      }
+                    }
+
+                    if (value.length === 4) {
+                      const year = parseInt('20' + value.substring(2, 4));
+                      const currentYear = new Date().getFullYear();
+                      if (year < currentYear) {
+                        return; // Don't update if year is in the past
+                      }
+                    }
+
+                    setExpiryDate(formatted);
                   }
                 }}
                 placeholder="MM/YY"
