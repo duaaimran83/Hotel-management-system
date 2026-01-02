@@ -1,0 +1,151 @@
+.booking-history {
+  animation: fadeIn 0.5s ease;
+}
+
+.booking-history h2 {
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.booking-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.booking-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.booking-header h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin: 0 0 5px 0;
+}
+
+.booking-id {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.booking-type-badge {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 4px 10px;
+  background: #f0f4ff;
+  color: #667eea;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.booking-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-row .label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-row span:not(.label) {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.detail-row .amount {
+  font-size: 1.3rem;
+  color: #667eea;
+}
+
+.payment-info {
+  grid-column: 1 / -1;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.approval-notice {
+  grid-column: 1 / -1;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #d97706;
+  font-weight: 500;
+}
+
+.rejection-notice {
+  grid-column: 1 / -1;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.no-bookings {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 15px;
+  color: #666;
+}
+
+.no-bookings p:first-child {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .booking-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .booking-details {
+    grid-template-columns: 1fr;
+  }
+}
+

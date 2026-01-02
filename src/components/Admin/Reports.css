@@ -1,0 +1,164 @@
+.reports {
+  animation: fadeIn 0.5s ease;
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.reports-header h2 {
+  color: #333;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.export-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.export-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+.report-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.report-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.report-card h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.report-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.report-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9ff;
+  border-radius: 10px;
+}
+
+.report-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.report-value {
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.report-value.revenue {
+  color: #10b981;
+  font-size: 1.5rem;
+}
+
+.report-value.available {
+  color: #10b981;
+}
+
+.report-value.occupied {
+  color: #ef4444;
+}
+
+.report-value.maintenance {
+  color: #f59e0b;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9ff;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+  background: #f0f4ff;
+  transform: translateX(5px);
+}
+
+.activity-icon {
+  font-size: 1.8rem;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-title {
+  color: #333;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+}
+
+.activity-date {
+  color: #666;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.activity-amount {
+  color: #667eea;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .reports-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-card.full-width {
+    grid-column: 1;
+  }
+}
+
