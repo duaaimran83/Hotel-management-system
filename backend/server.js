@@ -1,5 +1,5 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // 1. Import Mongoose
 const User = require('./models/User');
 const Room = require('./models/Room');
 const Booking = require('./models/Booking');
@@ -14,32 +14,45 @@ app.use(cors());
 // REPLACE THIS STRING WITH YOUR OWN FROM ATLAS
 const MONGO_URI = "mongodb+srv://adminfswd:fswdproject@trycluster0.rawptfn.mongodb.net/RoomSync?appName=TryCluster0";
 
-// Connect to Database
+// 2. Connect to Database
+// Best practice: Connect BEFORE defining routes or starting the server
 mongoose.connect(MONGO_URI)
-  .then(() => console.log("MongoDB Connected Successfully"))
-  .catch((err) => console.log("DB Connection Error:", err));
+  .then(() => {
+    console.log("MongoDB Connected Successfully");
+  })
+  .catch((err) => {
+    console.log("DB Connection Error:", err);
+  });
 
-app.get('/', (req, res) => res.send('API is running...'));
+// Simple Route to test if server is working
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
 
 // --- LOGIN ROUTE ---
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
+
   try {
+    // 1. Check if user exists in MongoDB
     const user = await User.findOne({ email });
+    
+    // 2. If no user found OR password doesn't match
     if (!user || user.password !== password) {
       return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
+
+    // 3. Login Success: Send back the user's role and name
     res.json({ 
       success: true, 
       user: { 
         id: user._id,
         name: user.name, 
         email: user.email, 
-        role: user.role,
-        isVIP: user.isVIP,
-        wealth: user.wealth
+        role: user.role 
       } 
     });
+
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
@@ -48,20 +61,28 @@ app.post('/api/login', async (req, res) => {
 // --- SIGNUP ROUTE ---
 app.post('/api/signup', async (req, res) => {
   const { name, email, password, role, wealth, isVIP } = req.body;
+
   try {
+    // 1. Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "User already exists" });
+      return res.status(400).json({ success: false, message: "User already exists with this email" });
     }
+
+    // 2. Create a new User
+    // Note: We force the role to 'customer' for security, unless you want to allow creating admins
     const newUser = new User({
       name,
       email,
-      password,
-      role: role || 'customer',
+      password, // In a real app, encrypt this!
+      role: role || 'customer' ,
       wealth,
       isVIP
     });
+
     await newUser.save();
+
+    // 3. Send success response
     res.status(201).json({ 
       success: true, 
       user: { 
@@ -71,80 +92,135 @@ app.post('/api/signup', async (req, res) => {
         role: newUser.role 
       } 
     });
+
   } catch (error) {
+    console.error("Signup Error:", error);
     res.status(500).json({ success: false, message: "Server error during signup" });
   }
 });
 
-// --- GET ALL ROOMS ---
+// --- GET ALL ROOMS ROUTE ---
 app.get('/api/rooms', async (req, res) => {
   try {
-    const rooms = await Room.find(); 
+    // 1. Fetch all rooms from MongoDB
+    const rooms = await Room.find();
+
+    // 2. Send them to the frontend
     res.json(rooms);
   } catch (error) {
-    res.status(500).json({ message: "Could not fetch rooms" });
+    res.status(500).json({ message: "Server Error: Could not fetch rooms" });
   }
 });
 
-// --- CREATE BOOKING ROUTE (UPDATED FOR FACILITIES) ---
+// --- GET SHARED ROOMS ROUTE ---
+app.get('/api/rooms/shared', async (req, res) => {
+  try {
+    // 1. Fetch only shared rooms from MongoDB
+    const sharedRooms = await Room.find({ isShared: true });
+
+    // 2. Send them to the frontend
+    res.json(sharedRooms);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error: Could not fetch shared rooms" });
+  }
+});
+
+// --- CREATE BOOKING ROUTE ---
 app.post('/api/bookings', async (req, res) => {
-  // Destructure ALL fields including new Facility ones
-  const { 
-    userId, 
-    roomId, 
-    checkIn, 
-    checkOut, 
-    totalAmount, 
-    // Facility Fields:
-    type, 
-    title, 
-    occasion, 
-    facilityName, 
-    numberOfPeople, 
-    startTime, 
-    endTime, 
-    notes 
+  const {
+    userId,
+    roomId,
+    checkIn,
+    checkOut,
+    totalAmount,
+    paymentDetails,
+    customers, // For shared bookings
+    isSharedBooking // Flag to indicate shared booking
   } = req.body;
 
   try {
+    // 1. Get room details to check if it's shared
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ success: false, message: "Room not found" });
+    }
+
+    // 2. Handle shared room bookings
+    if (room.isShared && isSharedBooking) {
+      // Validate that we have customers array
+      if (!customers || !Array.isArray(customers) || customers.length === 0) {
+        return res.status(400).json({ success: false, message: "Shared booking requires customer details" });
+      }
+
+      // Check if room has enough capacity
+      const requestedGuests = customers.length;
+      if (room.currentOccupancy + requestedGuests > room.maxOccupancy) {
+        return res.status(400).json({
+          success: false,
+          message: `Room can only accommodate ${room.maxOccupancy - room.currentOccupancy} more guests`
+        });
+      }
+
+      // Create booking with multiple customers
+      const newBooking = new Booking({
+        room: roomId,
+        customers: customers,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+        totalAmount: totalAmount,
+        status: 'confirmed',
+        type: 'shared_room'
+      });
+
+      await newBooking.save();
+
+      // Update room occupancy
+      const newOccupancy = room.currentOccupancy + requestedGuests;
+      const newStatus = newOccupancy >= room.maxOccupancy ? 'fully_booked' : 'partially_booked';
+      await Room.findByIdAndUpdate(roomId, {
+        currentOccupancy: newOccupancy,
+        status: newStatus
+      });
+
+      return res.status(201).json({ success: true, booking: newBooking });
+    }
+
+    // 3. Handle regular single bookings
     const newBooking = new Booking({
       user: userId,
-      room: roomId || null, // Room ID is null for facilities
+      room: roomId,
       checkInDate: checkIn,
       checkOutDate: checkOut,
       totalAmount: totalAmount,
-      
-      // CRITICAL: Save the new fields!
-      type: type || 'room', 
-      status: type === 'facility' ? 'pending_approval' : 'confirmed', // Auto-confirm rooms, wait for events
-      title,
-      occasion,
-      facilityName,
-      numberOfPeople,
-      startTime,
-      endTime,
-      notes
+      status: 'confirmed'
     });
 
     await newBooking.save();
 
-    // Update Room status ONLY if it's a Room booking
-    if (type !== 'facility' && roomId) {
-      await Room.findByIdAndUpdate(roomId, { status: 'booked' });
-    }
+    // Update room status
+    await Room.findByIdAndUpdate(roomId, { status: 'fully_booked' });
 
     res.status(201).json({ success: true, booking: newBooking });
+
   } catch (error) {
     console.error("Booking Error:", error);
     res.status(500).json({ success: false, message: "Could not create booking" });
   }
 });
 
-// --- GET USER BOOKINGS ---
+// --- GET USER BOOKINGS ROUTE ---
 app.get('/api/bookings/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const bookings = await Booking.find({ user: userId }).populate('room');
+
+    // Find bookings where user is either the primary user OR in the customers array
+    const bookings = await Booking.find({
+      $or: [
+        { user: userId }, // Single bookings
+        { 'customers.userId': userId } // Shared bookings where user is in customers array
+      ]
+    }).populate('room');
+
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: "Could not fetch bookings" });
@@ -154,6 +230,7 @@ app.get('/api/bookings/:userId', async (req, res) => {
 // --- ADMIN: GET ALL BOOKINGS ---
 app.get('/api/admin/bookings', async (req, res) => {
   try {
+    // Populate both User (name/email) and Room (roomNumber) details
     const bookings = await Booking.find()
       .populate('user', 'name email')
       .populate('room', 'roomNumber type');
@@ -166,7 +243,7 @@ app.get('/api/admin/bookings', async (req, res) => {
 // --- ADMIN: GET USERS ---
 app.get('/api/admin/users', async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.find().select('-password'); // Don't send passwords!
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: "Error fetching users" });
@@ -179,16 +256,23 @@ app.get('/api/admin/stats', async (req, res) => {
     const totalUsers = await User.countDocuments();
     const totalRooms = await Room.countDocuments();
     const totalBookings = await Booking.countDocuments();
+    
+    // Calculate Total Revenue
     const bookings = await Booking.find();
     const totalRevenue = bookings.reduce((sum, booking) => sum + booking.totalAmount, 0);
 
-    res.json({ totalUsers, totalRooms, totalBookings, totalRevenue });
+    res.json({
+      totalUsers,
+      totalRooms,
+      totalBookings,
+      totalRevenue
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching stats" });
   }
 });
 
-// --- ADMIN: ROOM MANAGEMENT ---
+// --- ADMIN: ADD A NEW ROOM ---
 app.post('/api/rooms', async (req, res) => {
   try {
     const newRoom = new Room(req.body);
@@ -199,15 +283,21 @@ app.post('/api/rooms', async (req, res) => {
   }
 });
 
+// --- ADMIN: UPDATE A ROOM ---
 app.put('/api/rooms/:id', async (req, res) => {
   try {
-    const updatedRoom = await Room.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedRoom = await Room.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true } // Return the updated version
+    );
     res.json({ success: true, room: updatedRoom });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error updating room" });
   }
 });
 
+// --- ADMIN: DELETE A ROOM ---
 app.delete('/api/rooms/:id', async (req, res) => {
   try {
     await Room.findByIdAndDelete(req.params.id);
@@ -217,7 +307,7 @@ app.delete('/api/rooms/:id', async (req, res) => {
   }
 });
 
-// --- ADMIN: USER MANAGEMENT ---
+// --- ADMIN: DELETE USER ---
 app.delete('/api/users/:id', async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
@@ -227,21 +317,31 @@ app.delete('/api/users/:id', async (req, res) => {
   }
 });
 
+// --- ADMIN: UPDATE USER ROLE (Promote/Demote) ---
 app.put('/api/users/:id/role', async (req, res) => {
-  const { role } = req.body;
+  const { role } = req.body; // e.g., { role: 'staff' }
   try {
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id, 
+      { role }, 
+      { new: true }
+    );
     res.json({ success: true, user: updatedUser });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error updating role" });
   }
 });
 
-// --- STAFF: UPDATE BOOKING STATUS ---
+// --- STAFF: UPDATE BOOKING STATUS (Check In/Out) ---
 app.put('/api/bookings/:id/status', async (req, res) => {
-  const { status } = req.body;
+  const { status } = req.body; // e.g. 'checked_in', 'checked_out', 'cancelled'
+  
   try {
-    const updatedBooking = await Booking.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      req.params.id, 
+      { status }, 
+      { new: true }
+    );
     res.json({ success: true, booking: updatedBooking });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error updating booking" });
@@ -250,19 +350,23 @@ app.put('/api/bookings/:id/status', async (req, res) => {
 
 // --- USER: UPDATE PROFILE ---
 app.put('/api/users/:id', async (req, res) => {
-  const { name, email, password, wealth, isVIP } = req.body;
+  const { name, email, password } = req.body;
+  
   try {
+    // 1. Find the user
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
+    // 2. Update fields if they are provided
     if (name) user.name = name;
     if (email) user.email = email;
-    if (password) user.password = password;
-    // Update Wealth/VIP if provided
-    if (wealth !== undefined) user.wealth = wealth;
-    if (isVIP !== undefined) user.isVIP = isVIP;
+    if (password) user.password = password; // In a real app, hash this again!
 
+    // 3. Save updates
     const updatedUser = await user.save();
+
     res.json({ 
       success: true, 
       user: { 
@@ -279,6 +383,7 @@ app.put('/api/users/:id', async (req, res) => {
   }
 });
 
+// 3. Start Server
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

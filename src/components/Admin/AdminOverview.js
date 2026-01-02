@@ -24,6 +24,7 @@ const AdminOverview = ({ bookings, rooms, users }) => {
 
   return (
     <div className="admin-overview">
+<<<<<<< HEAD
       <h2>Dashboard Overview</h2>
 
       <div className="stats-grid">
@@ -31,6 +32,24 @@ const AdminOverview = ({ bookings, rooms, users }) => {
           <div key={idx} className="stat-card">
             <div className="stat-icon" style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>
               {stat.icon}
+=======
+      <main className="admin-content">
+        {activeTab === 'overview' && (
+          <>
+            <h2>Dashboard Overview</h2>
+            <div className="stats-grid">
+              {dashboardStats.map((stat, idx) => (
+                <div key={idx} className="stat-card">
+                  <div className="stat-icon" style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>
+                    {stat.icon}
+                  </div>
+                  <div className="stat-content">
+                    <p className="stat-label">{stat.label}</p>
+                    <p className="stat-value">{stat.value}</p>
+                  </div>
+                </div>
+              ))}
+>>>>>>> 4e5bdffa44eb642aa5c79c152514a63121ebe997
             </div>
             <div className="stat-content">
               <p className="stat-label">{stat.label}</p>

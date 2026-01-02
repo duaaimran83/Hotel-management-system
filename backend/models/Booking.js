@@ -1,8 +1,17 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  
+  // Primary user (for single bookings) - optional for shared bookings
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+  // For shared room bookings - multiple customers
+  customers: [{
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    name: { type: String },
+    email: { type: String },
+    isPrimary: { type: Boolean, default: false } // Marks the main booker
+  }],
+
   // Optional: Room ID (only for room bookings)
   room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room' },
   
