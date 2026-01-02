@@ -73,6 +73,12 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
             ⭐ VIP
           </div>
         )}
+
+        {room.isSharedRoom && (
+          <div className="shared-room-badge">
+            🤝 Shared Room
+          </div>
+        )}
       </div>
 
       <div className="room-content">
@@ -92,6 +98,21 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
                 letterSpacing: '0.5px'
               }}>
                 ⭐ VIP
+              </span>
+            )}
+            {room.isSharedRoom && (
+              <span style={{ 
+                marginLeft: '8px', 
+                padding: '2px 8px', 
+                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)', 
+                color: '#ffffff',
+                borderRadius: '8px',
+                fontSize: '0.7rem',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                🤝 Shared
               </span>
             )}
           </h3>

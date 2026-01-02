@@ -88,12 +88,26 @@ export const mockRooms = [
     name: 'Shared Room',
     category: 'shared',
     capacity: 4,
-    beds: 4,
+    beds: 3,
     price: 30,
     status: 'available',
     isVIP: false,
+    isSharedRoom: true,
     image: '/images/6.jfif',
     amenities: ['WiFi', 'Air Conditioning', 'Shared Bathroom', 'Lockers', 'Common Area Access']
+  },
+  {
+    id: '13',
+    name: 'Budget Shared Room',
+    category: 'shared',
+    capacity: 3,
+    beds: 3,
+    price: 25,
+    status: 'available',
+    isVIP: false,
+    isSharedRoom: true,
+    image: '/images/1.jfif',
+    amenities: ['WiFi', 'Air Conditioning', 'Shared Bathroom', 'Lockers']
   },
   {
     id: '6',

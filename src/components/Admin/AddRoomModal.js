@@ -9,8 +9,18 @@ const AddRoomModal = ({ onClose, onSave }) => {
     beds: '',
     price: '',
     amenities: '',
-    status: 'available'
+    status: 'available',
+    isSharedRoom: false
   });
+
+  const handleSharedRoomChange = (e) => {
+    const isShared = e.target.checked;
+    setFormData({
+      ...formData,
+      isSharedRoom: isShared,
+      beds: isShared ? '3' : formData.beds
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -20,7 +30,8 @@ const AddRoomModal = ({ onClose, onSave }) => {
       capacity: parseInt(formData.capacity),
       beds: parseInt(formData.beds),
       price: parseFloat(formData.price),
-      amenities: formData.amenities.split(',').map(a => a.trim()).filter(a => a)
+      amenities: formData.amenities.split(',').map(a => a.trim()).filter(a => a),
+      isSharedRoom: formData.isSharedRoom
     };
     onSave(newRoom);
   };
@@ -77,6 +88,7 @@ const AddRoomModal = ({ onClose, onSave }) => {
                 value={formData.beds}
                 onChange={(e) => setFormData({ ...formData, beds: e.target.value })}
                 min="1"
+                disabled={formData.isSharedRoom}
                 required
               />
             </div>
@@ -91,6 +103,18 @@ const AddRoomModal = ({ onClose, onSave }) => {
                 required
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={formData.isSharedRoom}
+                onChange={handleSharedRoomChange}
+                style={{ marginRight: '8px', cursor: 'pointer' }}
+              />
+              Shared Room (3 Beds)
+            </label>
           </div>
 
           <div className="form-group">

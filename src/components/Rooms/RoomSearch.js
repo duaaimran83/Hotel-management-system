@@ -8,6 +8,7 @@ const RoomSearch = ({ rooms, onBookRoom, user }) => {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [priceRange, setPriceRange] = useState('all');
+  const [sharedRoomOnly, setSharedRoomOnly] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -49,7 +50,10 @@ const RoomSearch = ({ rooms, onBookRoom, user }) => {
         )
       );
     
-    return matchesVIPStatus && matchesSearch && matchesCategory && matchesPrice;
+    // 5. Shared Room Filter
+    const matchesSharedRoom = !sharedRoomOnly || room.isSharedRoom;
+    
+    return matchesVIPStatus && matchesSearch && matchesCategory && matchesPrice && matchesSharedRoom;
   });
 
   // --- DYNAMIC CATEGORY LIST ---
@@ -132,6 +136,18 @@ const RoomSearch = ({ rooms, onBookRoom, user }) => {
               </>
             )}
           </select>
+        </div>
+
+        <div className="filter-group">
+          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={sharedRoomOnly}
+              onChange={(e) => setSharedRoomOnly(e.target.checked)}
+              style={{ marginRight: '8px', cursor: 'pointer' }}
+            />
+            Shared Rooms Only (3 Beds)
+          </label>
         </div>
       </div>
 
