@@ -7,12 +7,13 @@ const cors = require('cors');
 
 const app = express();
 
+require('dotenv').config(); // Add this at the very top
+const MONGO_URI = process.env.MONGO_URI;
+
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-// REPLACE THIS STRING WITH YOUR OWN FROM ATLAS
-const MONGO_URI = "mongodb+srv://adminfswd:fswdproject@trycluster0.rawptfn.mongodb.net/RoomSync?appName=TryCluster0";
 
 // 2. Connect to Database
 // Best practice: Connect BEFORE defining routes or starting the server
@@ -125,7 +126,7 @@ app.get('/api/rooms/shared', async (req, res) => {
   }
 });
 
-// --- CREATE BOOKING ROUTE ---
+// --- CREATE BOOKING ROUTE (UPDATED FOR SHARED GUEST COUNT) ---
 app.post('/api/bookings', async (req, res) => {
   const {
     userId,
@@ -133,50 +134,48 @@ app.post('/api/bookings', async (req, res) => {
     checkIn,
     checkOut,
     totalAmount,
-    paymentDetails,
-    customers, // For shared bookings
-    isSharedBooking // Flag to indicate shared booking
+    guestCount, // <--- Now receiving this from frontend!
+    isSharedBooking
   } = req.body;
 
   try {
-    // 1. Get room details to check if it's shared
+    // 1. Get room details
     const room = await Room.findById(roomId);
     if (!room) {
       return res.status(404).json({ success: false, message: "Room not found" });
     }
 
-    // 2. Handle shared room bookings
+    // 2. SHARED ROOM LOGIC
     if (room.isShared && isSharedBooking) {
-      // Validate that we have customers array
-      if (!customers || !Array.isArray(customers) || customers.length === 0) {
-        return res.status(400).json({ success: false, message: "Shared booking requires customer details" });
-      }
+      // Use guestCount directly (defaults to 1 if missing)
+      const guests = guestCount || 1;
 
-      // Check if room has enough capacity
-      const requestedGuests = customers.length;
-      if (room.currentOccupancy + requestedGuests > room.maxOccupancy) {
+      // Check Capacity
+      if (room.currentOccupancy + guests > room.maxOccupancy) {
         return res.status(400).json({
           success: false,
-          message: `Room can only accommodate ${room.maxOccupancy - room.currentOccupancy} more guests`
+          message: `Not enough beds! Only ${room.maxOccupancy - room.currentOccupancy} left.`
         });
       }
 
-      // Create booking with multiple customers
+      // Create Booking
       const newBooking = new Booking({
+        user: userId, // The main user booking the beds
         room: roomId,
-        customers: customers,
         checkInDate: checkIn,
         checkOutDate: checkOut,
         totalAmount: totalAmount,
-        status: 'confirmed',
-        type: 'shared_room'
+        guestCount: guests, // Store the count
+        isSharedBooking: true,
+        status: 'confirmed'
       });
 
       await newBooking.save();
 
-      // Update room occupancy
-      const newOccupancy = room.currentOccupancy + requestedGuests;
+      // Update Room Occupancy
+      const newOccupancy = room.currentOccupancy + guests;
       const newStatus = newOccupancy >= room.maxOccupancy ? 'fully_booked' : 'partially_booked';
+      
       await Room.findByIdAndUpdate(roomId, {
         currentOccupancy: newOccupancy,
         status: newStatus
@@ -185,19 +184,20 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(201).json({ success: true, booking: newBooking });
     }
 
-    // 3. Handle regular single bookings
+    // 3. PRIVATE ROOM LOGIC (Standard)
     const newBooking = new Booking({
       user: userId,
       room: roomId,
       checkInDate: checkIn,
       checkOutDate: checkOut,
       totalAmount: totalAmount,
+      guestCount: 1,
       status: 'confirmed'
     });
 
     await newBooking.save();
 
-    // Update room status
+    // Mark room as occupied
     await Room.findByIdAndUpdate(roomId, { status: 'fully_booked' });
 
     res.status(201).json({ success: true, booking: newBooking });

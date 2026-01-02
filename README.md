@@ -1,204 +1,130 @@
-# RoomSync - Room Reservation and Facility Booking Portal
+# 🏨 RoomSync - Hotel Management System
 
-A modern, full-featured hotel management and booking portal built with React.js. This front-end application provides three distinct user interfaces for Admin, Staff, and Customer roles.
-
-## Features
-
-### 🎯 Core Functionality
-- **Three Role-Based Dashboards**: Admin, Staff, and Customer
-- **Room Search & Booking**: Browse available rooms with filters
-- **Payment Simulation**: Secure payment flow with modal popup
-- **Booking Management**: View and manage reservations
-- **Room Management**: Real-time room status updates
-- **Check-in/Check-out**: Streamlined guest management
-- **Reviews & Feedback**: Customer review system
-- **Analytics & Reports**: Revenue and occupancy tracking
-
-### 👥 User Roles
-
-#### Admin Dashboard
-- Dashboard overview with key metrics
-- User management (view, activate/deactivate)
-- Room management (add, edit, update status)
-- Reports & analytics (revenue, occupancy, bookings)
-
-#### Staff Dashboard
-- Check-in/Check-out management
-- Room status management
-- Booking management and monitoring
-
-#### Customer Dashboard
-- Room search with filters (date, category, price)
-- Booking creation and management
-- Payment processing (simulated)
-- Profile management
-- Reviews and feedback submission
-
-## Getting Started
-
-### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn package manager
-
-### Installation
-
-1. Clone or navigate to the project directory:
-```bash
-cd FS
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm start
-```
-
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Usage
-
-### Login
-1. Navigate to the login page
-2. Enter any email and password (no validation required for demo)
-3. Select your role:
-   - **Customer**: Access customer booking features
-   - **Staff**: Access staff management tools
-   - **Admin**: Access admin dashboard and controls
-4. Click "Login"
-
-### Making a Booking (Customer)
-1. Select check-in and check-out dates
-2. Use filters to find desired rooms
-3. Click "Book Now" on a room
-4. Fill in payment details in the modal
-5. Click "Pay" - a success popup will appear confirming payment
-
-### Managing Bookings (Staff)
-1. Go to "Check-In / Check-Out" tab
-2. View pending bookings ready for check-in
-3. Click "Check In" or "Check Out" buttons
-4. Room status updates automatically
-
-### Admin Functions
-1. **Overview**: View revenue, occupancy, and key metrics
-2. **User Management**: Search and manage user accounts
-3. **Room Management**: View and update room statuses
-4. **Reports**: Access detailed analytics and reports
-
-## Project Structure
-
-```
-roomsync/
-├── public/
-│   └── index.html
-├── src/
-│   ├── components/
-│   │   ├── Auth/
-│   │   │   ├── Login.js
-│   │   │   └── Login.css
-│   │   ├── Dashboards/
-│   │   │   ├── AdminDashboard.js
-│   │   │   ├── CustomerDashboard.js
-│   │   │   ├── StaffDashboard.js
-│   │   │   └── Dashboard.css
-│   │   ├── Rooms/
-│   │   │   ├── RoomSearch.js
-│   │   │   ├── RoomCard.js
-│   │   │   └── ...
-│   │   ├── Payment/
-│   │   │   ├── PaymentModal.js
-│   │   │   └── PaymentModal.css
-│   │   ├── Bookings/
-│   │   ├── Admin/
-│   │   ├── Staff/
-│   │   ├── Profile/
-│   │   └── Reviews/
-│   ├── data/
-│   │   └── mockData.js
-│   ├── App.js
-│   ├── App.css
-│   ├── index.js
-│   └── index.css
-├── package.json
-└── README.md
-```
-
-## Payment Simulation
-
-The payment system is fully simulated:
-1. User enters card details (card number, name, expiry, CVV)
-2. Clicks "Pay" button
-3. Shows processing animation
-4. Displays success confirmation popup
-5. Updates booking status to "confirmed"
-
-**Note**: No actual payment processing occurs. This is a front-end demo only.
-
-## Technologies Used
-
-- **React.js**: UI framework
-- **React Router**: Navigation and routing
-- **CSS3**: Styling with modern design patterns
-- **Local Storage**: Session management
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Demo Data
-
-The application comes with pre-loaded mock data:
-- 6 sample rooms (various categories and statuses)
-- Sample bookings
-- Sample users
-
-## Features Overview
-
-### Responsive Design
-- Mobile-friendly layouts
-- Adaptive grid systems
-- Touch-optimized interactions
-
-### Modern UI/UX
-- Gradient backgrounds
-- Smooth animations
-- Intuitive navigation
-- Color-coded status indicators
-
-## Notes
-
-- This is a **front-end only** application
-- No backend integration
-- Data persists in browser local storage during session
-- All bookings and changes are local to the browser
-
-## Future Enhancements
-
-- Backend API integration
-- Real payment gateway integration
-- Email notifications
-- Image uploads for rooms
-- Advanced reporting features
-- Multi-language support
-
-## License
-
-This project is created for educational purposes.
-
-## Authors
-
-- Aeman Aasim - 232384
-- Maheen Fatim - 232538
-- Dua Imran - 220972
+**RoomSync** is a full-stack Hotel Management & Booking System built with the **MERN Stack** (MongoDB, Express, React, Node.js). It features a complex booking engine supporting both private rooms and shared dormitories, a dynamic VIP tier system, and a comprehensive Staff Portal for real-time hotel operations.
 
 ---
 
-**RoomSync** - Streamlining hotel operations, one booking at a time! 🏨✨
+## 🚀 Key Features
 
+### 👤 **Customer Portal**
+
+* **Smart Room Search:** Filter by dates, price range, and room type.
+* **Shared Dorm Logic:** Book individual beds in shared rooms. The system automatically tracks bed availability.
+* **VIP System:** Wealth-based tier system. Users with wealth > $50k automatically unlock exclusive rooms (e.g., Presidential Suite) invisible to standard users.
+* **Booking History:** View past and upcoming stays.
+
+### 🛎️ **Staff Portal**
+
+* **Check-In / Check-Out:** Dashboard to handle guest arrivals and departures in real-time.
+* **Housekeeping Status:** Mark rooms as "Maintenance", "Dirty", or "Available" instantly.
+* **Live Updates:** Changes in room status immediately reflect on the customer booking side.
+
+### 🛡️ **Admin Dashboard**
+
+* **Analytics:** View total revenue, occupancy rates, and user stats.
+* **User Management:** Promote/demote users and manage staff roles.
+* **Room Management:** Add, edit, or delete rooms and amenities.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Frontend:** React.js, React Router, CSS3
+* **Backend:** Node.js, Express.js
+* **Database:** MongoDB (Mongoose ODM)
+* **Authentication:** Custom Auth (Login/Signup with Role-based Access)
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/duaaimran83/Hotel-management-system
+cd roomsync
+
+```
+
+### 2. Backend Setup
+
+Navigate to the backend folder and install dependencies:
+
+```bash
+cd backend
+npm install
+
+```
+
+Create a `.env` file in the `backend` folder and add your MongoDB connection string:
+
+```env
+MONGO_URI='mongodb+srv://adminfswd:fswdproject@trycluster0.rawptfn.mongodb.net/RoomSync?appName=TryCluster0'
+PORT=5000
+
+```
+
+
+Start the Backend Server:
+
+```bash
+node server.js
+
+```
+
+### 4. Frontend Setup
+
+Open a new terminal, navigate to the frontend folder, and start the React app:
+
+```bash
+cd frontend
+npm install
+npm start
+
+```
+
+The app should now be running at `http://localhost:3000`.
+
+---
+
+## 🔑 Demo Credentials
+
+Use these accounts to test different features of the application:
+
+| Role | Email | Password | Features to Test |
+| --- | --- | --- | --- |
+| **VIP Customer** | `ali@vip.com` | `123` | Can see & book the **VIP Penthouse**. |
+| **Student** | `aeman@student.com` | `123` | Can only see Standard/Shared rooms. Currently checked into Room 101. |
+| **Traveler** | `maheen@traveler.com` | `123` | Arriving today. Use this account to test **Check-In**. |
+| **Staff** | `staff@roomsync.com` | `123` | Access **Staff Portal** to check guests in/out & manage room status. |
+| **Admin** | `admin@roomsync.com` | `123` | Access **Admin Dashboard** for analytics. |
+
+---
+
+## 📸 Screenshots
+
+### 1. Smart Search & VIP Filtering
+
+*Automatic filtering of luxury suites based on user wealth.*
+
+### 2. Shared Dorm Booking
+
+*Smart bed counting logic prevents overbooking of shared spaces.*
+
+### 3. Staff Dashboard
+
+*Real-time Check-in/Check-out and Housekeeping controls.*
+
+---
+
+## 👨‍💻 Contributors
+
+* Aeman Aasim - 232384
+* Maheen Fatima - 232528
+* Duaa Imran - 220972
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.

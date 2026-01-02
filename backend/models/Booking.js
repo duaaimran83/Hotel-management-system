@@ -18,18 +18,22 @@ const bookingSchema = new mongoose.Schema({
   // --- TYPE DEFINITION ---
   type: { type: String, default: 'room' }, // 'room' or 'facility'
 
-  // --- FACILITY SPECIFIC FIELDS (Merged from your file) ---
-  facilityName: { type: String },          // e.g. "Grand Ball Room"
+  // --- FACILITY SPECIFIC FIELDS ---
+  facilityName: { type: String },           // e.g. "Grand Ball Room"
   title: { type: String },                 // e.g. "Tech Conference"
   occasion: { type: String },              // e.g. "Wedding"
-  numberOfPeople: { type: Number },        // "numberOfGuests" mapped to this
+  numberOfPeople: { type: Number },        // For Events/Facilities
   
-  // Time & Notes (From your Sequelize file)
+  // Time & Notes
   startTime: { type: String },             // e.g. "14:00"
   endTime: { type: String },               // e.g. "18:00"
   notes: { type: String },                 // Special requests
   
-  // --- SHARED FIELDS ---
+  // --- SHARED ROOM FIELDS (New Additions) ---
+  isSharedBooking: { type: Boolean, default: false }, // Identifies if this is a dorm bed booking
+  guestCount: { type: Number, default: 1 },           // Tracks number of beds booked
+  
+  // --- COMMON FIELDS ---
   checkInDate: { type: Date, required: true }, // For facilities, this is the Booking Date
   checkOutDate: { type: Date },                // Optional for facilities
   

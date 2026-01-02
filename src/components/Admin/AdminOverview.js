@@ -2,11 +2,16 @@ import React from 'react';
 import './AdminOverview.css';
 
 const AdminOverview = ({ bookings, rooms, users }) => {
+  // Calculate Stats
   const totalRevenue = bookings
     .filter(b => b.status === 'confirmed' || b.status === 'checked-out')
     .reduce((sum, b) => sum + b.totalAmount, 0);
 
-  const occupancyRate = ((rooms.filter(r => r.status === 'occupied').length / rooms.length) * 100).toFixed(1);
+  // Prevent division by zero if no rooms exist
+  const occupancyRate = rooms.length > 0 
+    ? ((rooms.filter(r => r.status === 'occupied').length / rooms.length) * 100).toFixed(1)
+    : 0;
+
   const totalBookings = bookings.length;
   const pendingBookings = bookings.filter(b => b.status === 'pending').length;
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'checked-in').length;
@@ -24,7 +29,6 @@ const AdminOverview = ({ bookings, rooms, users }) => {
 
   return (
     <div className="admin-overview">
-<<<<<<< HEAD
       <h2>Dashboard Overview</h2>
 
       <div className="stats-grid">
@@ -32,24 +36,6 @@ const AdminOverview = ({ bookings, rooms, users }) => {
           <div key={idx} className="stat-card">
             <div className="stat-icon" style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>
               {stat.icon}
-=======
-      <main className="admin-content">
-        {activeTab === 'overview' && (
-          <>
-            <h2>Dashboard Overview</h2>
-            <div className="stats-grid">
-              {dashboardStats.map((stat, idx) => (
-                <div key={idx} className="stat-card">
-                  <div className="stat-icon" style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>
-                    {stat.icon}
-                  </div>
-                  <div className="stat-content">
-                    <p className="stat-label">{stat.label}</p>
-                    <p className="stat-value">{stat.value}</p>
-                  </div>
-                </div>
-              ))}
->>>>>>> 4e5bdffa44eb642aa5c79c152514a63121ebe997
             </div>
             <div className="stat-content">
               <p className="stat-label">{stat.label}</p>
@@ -60,6 +46,7 @@ const AdminOverview = ({ bookings, rooms, users }) => {
       </div>
 
       <div className="overview-sections">
+        {/* Recent Bookings Table */}
         <div className="section-card">
           <h3>Recent Bookings</h3>
           <div className="bookings-table">
@@ -77,11 +64,11 @@ const AdminOverview = ({ bookings, rooms, users }) => {
               <tbody>
                 {recentBookings.length > 0 ? (
                   recentBookings.map(booking => (
-                    <tr key={booking.id}>
-                      <td>#{booking.id.slice(-6)}</td>
-                      <td>{booking.roomName}</td>
-                      <td>User {booking.userId}</td>
-                      <td>{new Date(booking.checkIn).toLocaleDateString()}</td>
+                    <tr key={booking.id || booking._id}> 
+                      <td>#{ (booking.id || booking._id || '').toString().slice(-6) }</td>
+                      <td>{booking.room ? booking.room.roomNumber : 'N/A'}</td>
+                      <td>{booking.user ? booking.user.name : 'Guest'}</td>
+                      <td>{new Date(booking.checkInDate).toLocaleDateString()}</td>
                       <td>${booking.totalAmount}</td>
                       <td>
                         <span className={`status-badge ${booking.status}`}>
@@ -102,6 +89,7 @@ const AdminOverview = ({ bookings, rooms, users }) => {
           </div>
         </div>
 
+        {/* Quick Stats Sidebar */}
         <div className="section-card">
           <h3>Quick Stats</h3>
           <div className="quick-stats">

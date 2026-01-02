@@ -1,0 +1,155 @@
+/* --- OVERLAY (Background) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6); /* Dark semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it sits on top of everything */
+  backdrop-filter: blur(3px); /* Optional: blurs the background slightly */
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* --- MODAL CONTENT (The Card) --- */
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px; /* Keeps it from getting too wide on desktop */
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+/* --- HEADER & BADGES --- */
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #1f2937;
+  font-size: 1.5rem;
+}
+
+.room-type-badge {
+  display: inline-block;
+  background-color: #e0e7ff;
+  color: #4338ca;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* --- CLOSE BUTTON --- */
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #4b5563;
+}
+
+/* --- FORM STYLING --- */
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-group small {
+  color: #ef4444; /* Red for "Only X beds left" warning */
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* --- PRICE SUMMARY SECTION --- */
+.price-summary {
+  background-color: #f9fafb;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.price-summary h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 1.25rem;
+}
+
+.price-breakdown {
+  margin: 5px 0 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* --- CONFIRM BUTTON --- */
+.confirm-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #4f46e5; /* Primary Blue/Indigo */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.confirm-btn:hover {
+  background-color: #4338ca;
+}
+
+.confirm-btn:active {
+  transform: scale(0.98);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

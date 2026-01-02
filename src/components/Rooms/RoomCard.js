@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react'; // 1. Import useState
 import './RoomCard.css';
 
 const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
+  // 2. State for Guest Count (Default to 1)
+  const [guestCount, setGuestCount] = useState(1);
+
   // --- SAFETY CHECKS ---
-  // If data is missing from DB, use these defaults
   const amenities = room.amenities || [];
   const roomName = room.name || `Room ${room.roomNumber || 'Unknown'}`;
   const roomCategory = room.type || room.category || 'Standard';
@@ -16,7 +18,14 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
   const currentOccupancy = room.currentOccupancy || 0;
   const availableSpots = maxOccupancy - currentOccupancy;
 
+  // 3. Determine Price based on Shared or Private
+  const basePrice = isShared ? (room.basePricePerPerson || room.price) : room.price;
+  
+  // Calculate display price (Price * Guests)
+  const displayPrice = basePrice * guestCount;
+
   const handleBook = () => {
+    // 1. DATE VALIDATION
     if (!checkIn || !checkOut) {
       alert('Please select check-in and check-out dates first');
       return;
@@ -26,21 +35,27 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
       return;
     }
 
+    // 2. AVAILABILITY CHECKS
     if (isShared) {
-      // For shared rooms, check if there are available spots
       if (availableSpots <= 0) {
         alert('This shared room is fully booked');
         return;
       }
+      // New Check: Do we have enough spots for selected guests?
+      if (guestCount > availableSpots) {
+        alert(`Only ${availableSpots} beds available. You selected ${guestCount}.`);
+        return;
+      }
     } else {
-      // Regular single room booking
       if (room.status !== 'available') {
         alert('This room is not available');
         return;
       }
     }
     
-    onBookRoom(room, checkIn, checkOut);
+    // 3. PROCEED TO BOOKING - PASS GUEST COUNT!
+    // We send 'guestCount' so the parent knows how much to charge
+    onBookRoom(room, checkIn, checkOut, guestCount);
   };
 
   const getStatusColor = (status) => {
@@ -69,17 +84,10 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
           />
         ) : null}
         
-        {/* Fallback Placeholder if no image */}
         <div className="room-placeholder" style={{ display: room.image ? 'none' : 'flex' }}>
           <span>{roomName}</span>
           {room.isVIP && (
-            <div style={{ 
-              marginTop: '10px', 
-              fontSize: '2rem',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-            }}>
-              ⭐
-            </div>
+            <div style={{ marginTop: '10px', fontSize: '2rem' }}>⭐</div>
           )}
         </div>
 
@@ -87,33 +95,12 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
           {room.status || 'Available'}
         </div>
         
-        {room.isVIP && (
-          <div className="vip-overlay-badge">
-            ⭐ VIP
-          </div>
-        )}
+        {room.isVIP && <div className="vip-overlay-badge">⭐ VIP</div>}
       </div>
 
       <div className="room-content">
         <div className="room-header">
-          <h3>
-            {roomName}
-            {room.isVIP && (
-              <span style={{ 
-                marginLeft: '8px', 
-                padding: '2px 8px', 
-                background: 'linear-gradient(135deg, #ffd700, #ffed4e)', 
-                color: '#013328',
-                borderRadius: '8px',
-                fontSize: '0.7rem',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                ⭐ VIP
-              </span>
-            )}
-          </h3>
+          <h3>{roomName}</h3>
           <span className="room-category">{roomCategory}</span>
         </div>
 
@@ -124,9 +111,22 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
                 <span className="icon">👥</span>
                 <span>Available: {availableSpots}/{maxOccupancy}</span>
               </div>
-              <div className="detail-item">
-                <span className="icon">💰</span>
-                <span>${room.basePricePerPerson || room.price}/person</span>
+              
+              {/* --- 4. GUEST SELECTOR (Only for Shared) --- */}
+              <div className="detail-item guest-selector">
+                <span className="icon">🛏️</span>
+                <label style={{ fontSize: '0.9rem', marginRight: '5px' }}>Book Beds:</label>
+                <select 
+                  value={guestCount} 
+                  onChange={(e) => setGuestCount(Number(e.target.value))}
+                  onClick={(e) => e.stopPropagation()} // Prevent card click
+                  style={{ padding: '2px 5px', borderRadius: '4px' }}
+                >
+                  {/* Create options based on available spots (e.g., 1 to 4) */}
+                  {[...Array(availableSpots).keys()].map(num => (
+                    <option key={num + 1} value={num + 1}>{num + 1}</option>
+                  ))}
+                </select>
               </div>
             </>
           ) : (
@@ -144,25 +144,18 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
         </div>
 
         <div className="room-amenities">
-          {/* SAFE AMENITIES LOOP */}
-          {amenities.length > 0 ? (
-            <>
-              {amenities.slice(0, 3).map((amenity, idx) => (
-                <span key={idx} className="amenity-tag">{amenity}</span>
-              ))}
-              {amenities.length > 3 && (
-                <span className="amenity-tag">+{amenities.length - 3} more</span>
-              )}
-            </>
-          ) : (
-             <span className="amenity-tag">Basic Amenities</span>
-          )}
+          {amenities.slice(0, 3).map((amenity, idx) => (
+            <span key={idx} className="amenity-tag">{amenity}</span>
+          ))}
         </div>
 
         <div className="room-footer">
           <div className="room-price">
-            <span className="price-amount">${isShared ? (room.basePricePerPerson || room.price) : room.price}</span>
-            <span className="price-unit">{isShared ? '/ person/night' : '/ night'}</span>
+            {/* Show calculated total for selected guests */}
+            <span className="price-amount">${displayPrice}</span>
+            <span className="price-unit">
+              {isShared ? `/night (${guestCount} ppl)` : '/ night'}
+            </span>
           </div>
           <button
             className="book-btn"
@@ -170,7 +163,7 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
             disabled={isShared ? availableSpots <= 0 : room.status !== 'available'}
           >
             {isShared
-              ? (availableSpots <= 0 ? 'Unavailable' : 'Book Now')
+              ? (availableSpots <= 0 ? 'Sold Out' : 'Book Now')
               : (room.status === 'available' ? 'Book Now' : 'Unavailable')
             }
           </button>

@@ -13,13 +13,53 @@ const RoomSearch = ({ rooms, onBookRoom, user }) => {
   const today = new Date().toISOString().split('T')[0];
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
-  // --- SAFE FILTERING LOGIC ---
-  const filteredRooms = rooms.filter(room => {
-    // CRITICAL FIX: Handle missing data safely
-    // 1. If 'name' is missing, use "Room 101"
-    // 2. If 'type' or 'category' is missing, use "Standard"
-    // 3. Ensure we always have a string before calling .toLowerCase()
+  // --- 1. NEW BOOKING HANDLER (Fixes the Price Logic) ---
+  const handleBookClick = (room, checkInDate, checkOutDate, guestCount = 1) => {
+    // A. Calculate Nights
+    const start = new Date(checkInDate);
+    const end = new Date(checkOutDate);
+    const timeDiff = end.getTime() - start.getTime();
+    const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    if (nights <= 0) {
+      alert("Please select valid dates");
+      return;
+    }
+
+    // B. Calculate Total Amount
+    let totalAmount = 0;
     
+    // Check both property names just to be safe
+    const isShared = room.isShared || room.isSharedRoom;
+
+    if (isShared) {
+      // SHARED: (Price Per Person) * Guests * Nights
+      const pricePerPerson = room.basePricePerPerson || room.price;
+      totalAmount = pricePerPerson * guestCount * nights;
+    } else {
+      // PRIVATE: (Room Price) * Nights
+      totalAmount = room.price * nights;
+    }
+
+    // C. Create Booking Object
+    const finalBookingData = {
+      room,
+      roomId: room._id || room.id,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      guestCount,
+      totalAmount,
+      nights,
+      isShared
+    };
+
+    // D. Send to Parent (App.js or Router)
+    onBookRoom(finalBookingData);
+  };
+
+  // --- 2. SAFE FILTERING LOGIC (Kept exactly as yours) ---
+  const filteredRooms = rooms.filter(room => {
+    // Handle missing data safely
     const safeName = (room.name || `Room ${room.roomNumber || 'Unknown'}`).toString();
     const safeCategory = (room.type || room.category || 'Standard').toString();
     const safeSearchTerm = (searchTerm || '').toString().toLowerCase();
@@ -51,13 +91,12 @@ const RoomSearch = ({ rooms, onBookRoom, user }) => {
       );
     
     // 5. Shared Room Filter
-    const matchesSharedRoom = !sharedRoomOnly || room.isSharedRoom;
+    const matchesSharedRoom = !sharedRoomOnly || (room.isShared || room.isSharedRoom);
     
     return matchesVIPStatus && matchesSearch && matchesCategory && matchesPrice && matchesSharedRoom;
   });
 
   // --- DYNAMIC CATEGORY LIST ---
-  // Safely extract categories from available rooms
   const availableRooms = rooms.filter(room => user?.isVIP ? room.isVIP : !room.isVIP);
   
   const categories = ['all', ...new Set(availableRooms.map(r => 
@@ -146,7 +185,7 @@ const RoomSearch = ({ rooms, onBookRoom, user }) => {
               onChange={(e) => setSharedRoomOnly(e.target.checked)}
               style={{ marginRight: '8px', cursor: 'pointer' }}
             />
-            Shared Rooms Only (3 Beds)
+            Shared Rooms Only
           </label>
         </div>
       </div>
@@ -155,16 +194,18 @@ const RoomSearch = ({ rooms, onBookRoom, user }) => {
         {filteredRooms.length > 0 ? (
           filteredRooms.map(room => (
             <RoomCard
-              key={room.id}
-              // CRITICAL: We pass the safe name down to the card too!
+              key={room.id || room._id}
+              // We pass the SAFE data logic you created
               room={{
                 ...room,
                 name: room.name || `Room ${room.roomNumber}`,
-                category: room.type || room.category || 'Standard'
+                category: room.type || room.category || 'Standard',
+                // Ensure isShared is present
+                isShared: room.isShared || room.isSharedRoom 
               }}
               checkIn={checkIn}
               checkOut={checkOut}
-              onBookRoom={onBookRoom}
+              onBookRoom={handleBookClick} // <--- USE THE NEW HANDLER
             />
           ))
         ) : (
