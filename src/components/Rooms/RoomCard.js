@@ -4,11 +4,17 @@ import './RoomCard.css';
 const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
   // --- SAFETY CHECKS ---
   // If data is missing from DB, use these defaults
-  const amenities = room.amenities || []; 
+  const amenities = room.amenities || [];
   const roomName = room.name || `Room ${room.roomNumber || 'Unknown'}`;
   const roomCategory = room.type || room.category || 'Standard';
   const capacity = room.capacity || 2;
   const beds = room.beds || 1;
+
+  // Shared room properties
+  const isShared = room.isShared || false;
+  const maxOccupancy = room.maxOccupancy || capacity;
+  const currentOccupancy = room.currentOccupancy || 0;
+  const availableSpots = maxOccupancy - currentOccupancy;
 
   const handleBook = () => {
     if (!checkIn || !checkOut) {
@@ -19,16 +25,29 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
       alert('Check-out date must be after check-in date');
       return;
     }
-    if (room.status !== 'available') {
-      alert('This room is not available');
-      return;
+
+    if (isShared) {
+      // For shared rooms, check if there are available spots
+      if (availableSpots <= 0) {
+        alert('This shared room is fully booked');
+        return;
+      }
+    } else {
+      // Regular single room booking
+      if (room.status !== 'available') {
+        alert('This room is not available');
+        return;
+      }
     }
+    
     onBookRoom(room, checkIn, checkOut);
   };
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'available': return '#10b981';
+      case 'partially_booked': return '#3b82f6';
+      case 'fully_booked': return '#ef4444';
       case 'occupied': return '#ef4444';
       case 'maintenance': return '#f59e0b';
       default: return '#6b7280';
@@ -73,12 +92,6 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
             ⭐ VIP
           </div>
         )}
-
-        {room.isSharedRoom && (
-          <div className="shared-room-badge">
-            🤝 Shared Room
-          </div>
-        )}
       </div>
 
       <div className="room-content">
@@ -100,34 +113,34 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
                 ⭐ VIP
               </span>
             )}
-            {room.isSharedRoom && (
-              <span style={{ 
-                marginLeft: '8px', 
-                padding: '2px 8px', 
-                background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)', 
-                color: '#ffffff',
-                borderRadius: '8px',
-                fontSize: '0.7rem',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                🤝 Shared
-              </span>
-            )}
           </h3>
           <span className="room-category">{roomCategory}</span>
         </div>
 
         <div className="room-details">
-          <div className="detail-item">
-            <span className="icon">👥</span>
-            <span>Capacity: {capacity}</span>
-          </div>
-          <div className="detail-item">
-            <span className="icon">🛏️</span>
-            <span>{beds} beds</span>
-          </div>
+          {isShared ? (
+            <>
+              <div className="detail-item">
+                <span className="icon">👥</span>
+                <span>Available: {availableSpots}/{maxOccupancy}</span>
+              </div>
+              <div className="detail-item">
+                <span className="icon">💰</span>
+                <span>${room.basePricePerPerson || room.price}/person</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="detail-item">
+                <span className="icon">👥</span>
+                <span>Capacity: {capacity}</span>
+              </div>
+              <div className="detail-item">
+                <span className="icon">🛏️</span>
+                <span>{beds} beds</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="room-amenities">
@@ -148,15 +161,18 @@ const RoomCard = ({ room, checkIn, checkOut, onBookRoom }) => {
 
         <div className="room-footer">
           <div className="room-price">
-            <span className="price-amount">${room.price}</span>
-            <span className="price-unit">/ night</span>
+            <span className="price-amount">${isShared ? (room.basePricePerPerson || room.price) : room.price}</span>
+            <span className="price-unit">{isShared ? '/ person/night' : '/ night'}</span>
           </div>
-          <button 
+          <button
             className="book-btn"
             onClick={handleBook}
-            disabled={room.status !== 'available'}
+            disabled={isShared ? availableSpots <= 0 : room.status !== 'available'}
           >
-            {room.status === 'available' ? 'Book Now' : 'Unavailable'}
+            {isShared
+              ? (availableSpots <= 0 ? 'Unavailable' : 'Book Now')
+              : (room.status === 'available' ? 'Book Now' : 'Unavailable')
+            }
           </button>
         </div>
       </div>

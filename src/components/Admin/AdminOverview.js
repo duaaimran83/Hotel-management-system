@@ -127,22 +127,6 @@ const AdminOverview = ({ onLogout }) => {
 
   return (
     <div className="admin-overview">
-      <header className="admin-header">
-        <h1>RoomSync - Admin Portal</h1>
-        <div className="admin-actions">
-          <span>Admin: Admin User</span>
-          <button onClick={onLogout} className="logout-btn">Logout</button>
-        </div>
-      </header>
-
-      <nav className="admin-nav">
-        <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>Overview & Analytics</button>
-        <button className={activeTab === 'approvals' ? 'active' : ''} onClick={() => setActiveTab('approvals')}>VIP Facility Approvals</button>
-        <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>User Management</button>
-        <button className={activeTab === 'rooms' ? 'active' : ''} onClick={() => setActiveTab('rooms')}>Room Management</button>
-        <button className={activeTab === 'reports' ? 'active' : ''} onClick={() => setActiveTab('reports')}>Reports & Analytics</button>
-      </nav>
-
       <main className="admin-content">
         {activeTab === 'overview' && (
           <>

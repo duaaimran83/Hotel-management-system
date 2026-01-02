@@ -60,8 +60,33 @@ const rooms = [
     type: "Single",
     price: 110,
     description: "Standard single room.",
-    status: "maintenance", 
+    status: "maintenance",
     image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=500&q=60"
+  },
+  // Shared Rooms
+  {
+    roomNumber: "DORM-01",
+    type: "Shared Dormitory",
+    price: 250, // Total price for the room
+    basePricePerPerson: 50, // Price per person
+    description: "Comfortable shared dormitory for up to 6 people. Perfect for groups, families, or budget travelers.",
+    status: "available",
+    isShared: true,
+    maxOccupancy: 6,
+    currentOccupancy: 0,
+    image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=500&q=60"
+  },
+  {
+    roomNumber: "SHARED-01",
+    type: "Shared Suite",
+    price: 400, // Total price for the room
+    basePricePerPerson: 80, // Price per person
+    description: "Spacious shared suite for up to 4 people with common living area. Great for friends or small groups.",
+    status: "available",
+    isShared: true,
+    maxOccupancy: 4,
+    currentOccupancy: 0,
+    image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=500&q=60"
   }
 ];
 
